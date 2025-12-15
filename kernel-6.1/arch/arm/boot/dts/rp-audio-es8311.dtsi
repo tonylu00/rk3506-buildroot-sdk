@@ -1,0 +1,54 @@
+/{
+    es8311_sound: es8311-sound {
+        status = "okay";
+        compatible = "simple-audio-card";
+        simple-audio-card,format = "i2s";
+        simple-audio-card,mclk-fs = <256>;
+        simple-audio-card,name = "rockchip,es8311-sound";
+        simple-audio-card,cpu {
+            sound-dai = <&sai1>;
+        };
+        simple-audio-card,codec {
+            sound-dai = <&es8311>;
+        };
+    };    
+};
+
+&sai1 {
+	status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io9_sai1_sclk
+                 &rm_io10_sai1_lrck
+                 &rm_io11_sai1_sdi
+                 &rm_io12_sai1_sdo0>;
+};
+
+&i2c1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io7_i2c1_sda &rm_io6_i2c1_scl>;
+    es8311: es8311@18 {
+        compatible = "everest,es8311";
+        status = "okay";
+        reg = <0x18>;
+        
+        clocks = <&mclkout_sai1>;
+        clock-names = "mclk";
+        assigned-clocks = <&mclkout_sai1>;
+        assigned-clock-rates = <12288000>;
+        
+        adc-pga-gain = <6>;  /* 18dB */
+        adc-volume = <0xbf>;  /* 0dB */
+        dac-volume = <0xbf>;  /* 0dB */
+        aec-mode = "adc left, adc right";
+        pinctrl-names = "default";
+        pinctrl-0 = <&rm_io8_sai1_mclk>;
+        spk-ctl-gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
+        #sound-dai-cells = <0>;
+    };
+};
+
+&i2c0 {
+    status = "disabled";
+    /delete-node/ es8388@11;
+};

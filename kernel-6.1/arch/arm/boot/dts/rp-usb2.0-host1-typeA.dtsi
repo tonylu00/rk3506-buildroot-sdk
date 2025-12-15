@@ -1,0 +1,14 @@
+&usb20_otg1 {
+    status = "okay";
+    dr_mode = "host";
+};
+
+&usb2phy {
+    status = "okay";
+};
+
+&u2phy_otg1 { 
+    status = "okay";
+};
+                        
+

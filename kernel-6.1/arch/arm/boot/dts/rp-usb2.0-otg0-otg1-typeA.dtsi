@@ -1,0 +1,25 @@
+&usb20_otg0 {
+        dr_mode = "otg";
+        /* vbus-supply = <&vcc5v0_otg0>;
+        rockchip,gpio-vbus-det; */
+        status = "okay";
+};
+
+&usb2phy {
+        /* extcon = <&extcon_usb>; */
+        status = "okay";
+};
+
+&u2phy_otg0 {
+        status = "okay";
+};
+
+&u2phy_otg1 { 
+        status = "okay";
+};
+                        
+&usb20_otg1 {
+        dr_mode = "host";
+        status = "okay";
+};
+

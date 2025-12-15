@@ -1,0 +1,9 @@
+#!/bin/bash
+
+alsactl restore -f /var/lib/alsa/asound.state
+
+board=`cat /proc/device-tree/model`
+
+if [[ "$board" =~ "u7-rk3506g" ]];then
+	cp /etc/asound_u7.conf /etc/asound.conf
+fi

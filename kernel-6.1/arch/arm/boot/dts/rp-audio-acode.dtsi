@@ -1,0 +1,24 @@
+/{
+    acodec_sound: acodec-sound {
+        compatible = "simple-audio-card";
+        simple-audio-card,name = "rockchip,acodec";
+        simple-audio-card,format = "i2s";
+        simple-audio-card,mclk-fs = <1024>;
+        simple-audio-card,bitclock-master = <&codec_master>;
+        simple-audio-card,frame-master = <&codec_master>;
+        simple-audio-card,cpu {
+            sound-dai = <&sai4>;
+        };
+        codec_master: simple-audio-card,codec {
+            sound-dai = <&audio_codec>;
+        };
+    };
+};
+
+&sai4 {
+    status = "okay";
+};
+
+&audio_codec {
+    status = "okay";
+};

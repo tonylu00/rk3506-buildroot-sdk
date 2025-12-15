@@ -1,0 +1,264 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+#include <dt-bindings/gpio/nca9555-gpio.h>
+
+#include "rp-rk3506b-board.dtsi"
+
+#include "rp-adc.dtsi"
+
+#include "rp-usb2.0-otg0-typeA.dtsi"
+#include "rp-usb2.0-host1-typeA.dtsi"
+
+#include "rp-audio-es8311.dtsi"
+#include "rp-audio-acode.dtsi"
+
+#include "rp-gmac0-100m.dtsi"
+#include "rp-gmac1-100m.dtsi"
+#include "rp-wifibt-sdmmc.dtsi"
+
+#include "rp-lcd-mipi-7-1024-600.dtsi"
+
+/ {
+    model = "u7-rk3506g";
+	
+    rp_power {
+        status = "okay";
+        compatible = "rp_power";
+        rp_not_deep_sleep = <1>;
+
+//#define GPIO_FUNCTION_OUTPUT 0
+//#define GPIO_FUNCTION_INPUT 1
+//#define GPIO_FUNCTION_IRQ 2
+//#define GPIO_FUNCTION_FLASH 3
+//#define GPIO_FUNCTION_OUTPUT_CTRL 4
+        vdd_otg0 {     
+            gpio_num = <&gpio1 RK_PC4 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        vdd_otg1 {     
+            gpio_num = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+    };
+ 
+    rp_gpio {
+        status = "okay";
+        compatible = "rp_gpio";
+        
+        gpio1a6 {     
+            gpio_num = <&gpio1 RK_PA6 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1a7 {     
+            gpio_num = <&gpio1 RK_PA7 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1a3 {     
+            gpio_num = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1b0 {     
+            gpio_num = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio0b5 {     
+            gpio_num = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1b4 {     
+            gpio_num = <&gpio1 RK_PB4 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1b5 {     
+            gpio_num = <&gpio1 RK_PB5 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1b6 {     
+            gpio_num = <&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1b7 {     
+            gpio_num = <&gpio1 RK_PB7 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1c0 {     
+            gpio_num = <&gpio1 RK_PC0 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+        
+        gpio1c1 {     
+            gpio_num = <&gpio1 RK_PC1 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+    };
+    
+    wireless-bluetooth {
+        compatible = "bluetooth-platdata";
+        uart_rts_gpios = <&gpio1 RK_PD1 GPIO_ACTIVE_LOW>;
+        pinctrl-names = "default", "rts_gpio";
+        pinctrl-0 = <&uart5m1_rtsn_pins>;
+        pinctrl-1 = <&uart5_gpios>;
+        BT,reset_gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_HIGH>;
+        BT,wake_gpio = <&gpio4 RK_PB3 GPIO_ACTIVE_HIGH>;
+        BT,wake_host_irq = <&gpio4 RK_PB2 GPIO_ACTIVE_HIGH>;
+        status = "okay";
+    };
+};
+
+&sdio_pwrseq{
+    status = "okay";
+    compatible = "mmc-pwrseq-simple";
+    pinctrl-names = "default";
+    pinctrl-0 = <&wifi_poweren_gpio>;
+    /*
+     * On the module itself this is one of these (depending
+     * on the actual card populated):
+     * - SDIO_RESET_L_WL_REG_ON
+     * - PDN (power down when low)
+     */
+    post-power-on-delay-ms = <300>;
+    reset-gpios = <&gpio1 RK_PC5 GPIO_ACTIVE_LOW>;   
+};
+
+&wireless_wlan{
+    status = "okay";
+    clocks = <&hym8563>;
+    clock-names = "ext_clock";
+    pinctrl-0 = <&wifi_host_wake_irq>;
+    WIFI,host_wake_irq = <&gpio0 RK_PD0 GPIO_ACTIVE_HIGH>;
+    /delete-property/ WIFI,poweren_gpio;
+    // WIFI,poweren_gpio = <&gpio1 RK_PC5 GPIO_ACTIVE_HIGH>;
+};
+
+&dsi_panel {
+    reset-gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
+    enable-gpios = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+};
+
+&gmac0 {
+    status = "okay";
+    snps,reset-gpio = <&gpio0 RK_PC2 GPIO_ACTIVE_LOW>;
+    snps,reset-active-low;
+    /* Reset time is 20ms, 100ms for rtl8211f */
+    snps,reset-delays-us = <0 10000 100000>;	
+};
+
+&gmac1 {
+    snps,reset-gpio = <&gpio1 RK_PC7 GPIO_ACTIVE_LOW>; 
+    snps,reset-active-low;
+    /* Reset time is 20ms, 100ms for rtl8211f */
+    snps,reset-delays-us = <0 20000 100000>;
+};
+
+&wdt0 {
+    status = "okay";
+};
+
+&wdt1 {
+    status = "okay";
+};
+
+// TTL
+&uart1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io17_uart1_tx &rm_io16_uart1_rx>;	
+};
+
+// RS-232
+&uart2 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io2_uart2_tx &rm_io0_uart2_rx>;      
+};
+
+// RS-485
+&uart3 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io14_uart3_tx &rm_io15_uart3_rx>;
+};
+
+// RS-485
+&uart4 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io28_uart4_tx &rm_io27_uart4_rx>;	    
+};
+
+// to BT
+&uart5 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&uart5m1_xfer_pins &uart5m1_ctsn_pins>;
+    status = "okay";
+};
+
+&i2c2 {
+    status = "okay";
+    clock-frequency = <400000>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io4_i2c2_scl &rm_io5_i2c2_sda>;
+   
+    hym8563: hym8563@51 {
+        compatible = "haoyu,hym8563";
+        reg = <0x51>;
+        #clock-cells = <0>;
+        clock-frequency = <32768>;
+        clock-output-names = "hym8563-32k";
+    };
+};
+
+&can0 {
+    status = "okay";
+    assigned-clocks = <&cru CLK_CAN0>;
+    assigned-clock-rates = <200000000>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io19_can0_tx &rm_io20_can0_rx>;
+};
+
+&can1 {
+    status = "okay";
+    assigned-clocks = <&cru CLK_CAN1>;
+    assigned-clock-rates = <200000000>;  
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io25_can1_tx &rm_io26_can1_rx>;
+};
+
+&goodix_ts{   
+    goodix_rst_gpio = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+    goodix_irq_gpio = <&gpio1 RK_PA0 IRQ_TYPE_EDGE_FALLING>;
+    buzzer_gpio = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>; // 蜂鸣器IO
+};
+
+&pinctrl {
+    wireless-wlan {
+        wifi_host_wake_irq: wifi-host-wake-irq {
+            rockchip,pins = <0 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
+        };    
+        wifi_poweren_gpio: wifi-poweren-gpio {
+            rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+    };
+    
+    wireless-bluetooth {
+        uart5_gpios: uart5-gpios {
+            rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>, 
+                            <4 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>,
+                            <4 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+    };
+};

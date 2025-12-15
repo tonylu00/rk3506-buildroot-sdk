@@ -1,0 +1,225 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+#include <dt-bindings/gpio/nca9555-gpio.h>
+
+#include "rp-rk3506b-board.dtsi"
+
+#include "rp-adc.dtsi"
+
+#include "rp-usb2.0-otg0-typeA.dtsi"
+#include "rp-usb2.0-host1-typeA.dtsi"
+
+#include "rp-audio-es8338.dtsi"
+#include "rp-audio-acode.dtsi"
+
+#include "rp-gmac0-100m.dtsi"
+#include "rp-gmac1-100m.dtsi"
+#include "rp-wifibt-sdmmc.dtsi"
+
+#include "rp-lcd-mipi-7-1024-600.dtsi"
+//#include "rp-lcd-rgb-7-1024-600.dtsi"
+
+/ {
+    model = "rp-rk3506b";
+
+    vdd_3v3_5v_control: vdd-3v3-5v-control {
+        compatible = "regulator-fixed";
+        regulator-name = "vdd_3v3_5v_control";
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        enable-active-high;
+        gpio = <&gpio0 RK_PD0 GPIO_ACTIVE_HIGH>;    //In the uboot phase fixed.c resolves gpio
+        gpios = <&gpio0 RK_PD0 GPIO_ACTIVE_HIGH>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&vdd_control>;
+    };
+	
+    rp_power {
+        status = "okay";
+        compatible = "rp_power";
+        rp_not_deep_sleep = <1>;
+
+//#define GPIO_FUNCTION_OUTPUT 0
+//#define GPIO_FUNCTION_INPUT 1
+//#define GPIO_FUNCTION_IRQ 2
+//#define GPIO_FUNCTION_FLASH 3
+//#define GPIO_FUNCTION_OUTPUT_CTRL 4
+
+        vdd_otg0 {     
+            gpio_num = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+		
+        LED {
+            gpio_num = <&nca9555_gpio IO_02 GPIO_ACTIVE_HIGH>;
+            gpio_function = <3>;
+        };
+
+        vdd_4g {
+            gpio_num = <&nca9555_gpio IO_03 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+		
+        4G_PWRKEY {
+            gpio_num = <&nca9555_gpio IO_04 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+
+        hub_rst {
+            gpio_num = <&nca9555_gpio IO_05 GPIO_ACTIVE_LOW>;
+            gpio_function = <4>;
+        };
+        
+        usb_power {
+            gpio_num = <&nca9555_gpio IO_06 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+
+        spk {
+            gpio_num = <&nca9555_gpio IO_07 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+
+        mute {
+            gpio_num = <&nca9555_gpio IO_10 GPIO_ACTIVE_LOW>;
+            gpio_function = <4>;
+        };
+    };
+ 
+    rp_gpio {
+        status = "okay";
+        compatible = "rp_gpio";
+        
+        gpio4b3 {       
+            gpio_num = <&gpio4 RK_PB3 GPIO_ACTIVE_HIGH>;
+            gpio_function = <0>;
+        };
+		
+        IO11 {    
+            gpio_num = <&nca9555_gpio IO_11 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO12 {    
+            gpio_num = <&nca9555_gpio IO_12 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO13 {    
+            gpio_num = <&nca9555_gpio IO_13 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO14 {    
+            gpio_num = <&nca9555_gpio IO_14 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO15 {    
+            gpio_num = <&nca9555_gpio IO_15 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO16 {    
+            gpio_num = <&nca9555_gpio IO_16 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+        
+        IO17 {    
+            gpio_num = <&nca9555_gpio IO_17 GPIO_ACTIVE_HIGH>;
+            gpio_function = <4>;
+        };
+    };
+};
+
+&wdt0 {
+    status = "okay";
+};
+
+&wdt1 {
+    status = "okay";
+};
+
+//TTL
+&uart1 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io17_uart1_tx &rm_io16_uart1_rx>;	
+};
+
+//RS-485
+&uart2 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io2_uart2_tx &rm_io0_uart2_rx>;      
+};
+
+//TTL
+&uart3 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io14_uart3_tx &rm_io15_uart3_rx>;
+};
+
+//TTL
+&uart4 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io30_uart4_rx &rm_io31_uart4_tx>;	    
+};
+
+&i2c2 {
+    status = "okay";
+    clock-frequency = <400000>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io4_i2c2_scl &rm_io5_i2c2_sda>;
+   
+    hym8563: hym8563@51 {
+        compatible = "haoyu,hym8563";
+        reg = <0x51>;
+        #clock-cells = <0>;
+        clock-frequency = <32768>;
+        clock-output-names = "hym8563-32k";
+    };
+	
+    nca9555: mfd-gpio@20 {
+        compatible = "nca9555";
+        reg = <0x20>;
+        nca9555_gpio: gpio-normal@20 {
+            compatible = "nca9555-gpio";
+            gpio-controller;
+            #gpio-cells = <2>;
+        };
+    };
+};
+
+&can0 {
+    status = "okay";
+    assigned-clocks = <&cru CLK_CAN0>;
+    assigned-clock-rates = <200000000>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io19_can0_tx &rm_io20_can0_rx>;
+};
+
+&can1 {
+    status = "okay";
+    assigned-clocks = <&cru CLK_CAN1>;
+    assigned-clock-rates = <200000000>;  
+    pinctrl-names = "default";
+    pinctrl-0 = <&rm_io25_can1_tx &rm_io26_can1_rx>;
+};
+
+&pinctrl {
+    power_control{
+        vdd_control: vdd-control {
+            rockchip,pins = <0 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;
+        };
+    };
+};
+

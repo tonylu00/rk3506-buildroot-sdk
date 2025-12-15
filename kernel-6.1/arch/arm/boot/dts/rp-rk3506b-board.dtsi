@@ -1,0 +1,220 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+#include <dt-bindings/gpio/nca9555-gpio.h>
+#include <dt-bindings/display/drm_mipi_dsi.h>
+#include <dt-bindings/input/rk-input.h>
+#include <dt-bindings/suspend/rockchip-rk3506.h>
+
+#include "rk3506.dtsi"
+
+/ {
+    model = "Rockchip RK3502 EVB1 V10 Board";
+    compatible = "rockchip,rk3502-evb1-v10", "rockchip,rk3502";
+
+    chosen {
+        //bootargs = "earlycon=uart8250,mmio32,0xff0a0000 console=ttyFIQ0 ubi.mtd=5 ubi.block=0,rootfs root=/dev/ubiblock0_0 rootfstype=squashfs rootwait snd_aloop.index=7 snd_aloop.use_raw_jiffies=1";
+        bootargs = "earlycon=uart8250,mmio32,0xff0a0000 console=ttyFIQ0 ubi.mtd=5 root=ubi0:rootfs rw rootfstype=ubifs rootwait snd_aloop.index=7 snd_aloop.use_raw_jiffies=1";
+    };
+
+    dsm_sound: dsm-sound {
+        status = "disabled";
+        compatible = "simple-audio-card";
+        simple-audio-card,format = "i2s";
+        simple-audio-card,mclk-fs = <256>;
+        simple-audio-card,name = "rockchip,dsm-sound";
+        simple-audio-card,bitclock-master = <&sndcodec>;
+        simple-audio-card,frame-master = <&sndcodec>;
+        sndcpu: simple-audio-card,cpu {
+            sound-dai = <&sai3>;
+        };
+        sndcodec: simple-audio-card,codec {
+            sound-dai = <&acdcdig_dsm>;
+        };
+    };
+
+    fiq_debugger: fiq-debugger {
+        compatible = "rockchip,fiq-debugger";
+        rockchip,serial-id = <0>;
+        rockchip,wake-irq = <0>;
+        rockchip,irq-mode-enable = <1>;
+        rockchip,baudrate = <115200>;	/* Only 115200 and 1500000 */
+        interrupts = <GIC_SPI 115 IRQ_TYPE_LEVEL_HIGH>;
+    };
+
+    gpio_keys: gpio-keys {
+        status = "disabled";
+        compatible = "gpio-keys";
+        pinctrl-names = "default";
+        pinctrl-0 = <&key_wake_up>;
+
+        wake_up: wake-up {
+        label = "Wake-up";
+            gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
+            linux,code = <KEY_WAKEUP>;
+            wakeup-source;
+        };
+    };
+
+    vcc12v_dc: vcc12v-dc {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc12v_dc";
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-min-microvolt = <12000000>;
+        regulator-max-microvolt = <12000000>;
+    };
+
+    vcc_sys: vcc-sys {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc_sys";
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-min-microvolt = <5000000>;
+        regulator-max-microvolt = <5000000>;
+        vin-supply = <&vcc12v_dc>;
+    };
+
+    vcc3v3_stb: vcc3v3-stb {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc3v3_stb";
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        vin-supply = <&vcc_sys>;
+    };
+
+    vcc_1v8: vcc-1v8 {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc_1v8";
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-min-microvolt = <1800000>;
+        regulator-max-microvolt = <1800000>;
+        vin-supply = <&vcc3v3_stb>;
+    };
+
+    vcc_ddr: vcc-ddr {
+        compatible = "regulator-fixed";
+        regulator-name = "vcc_ddr";
+        regulator-always-on;
+        regulator-boot-on;
+        vin-supply = <&vcc_sys>;
+    };
+
+    vdd_arm: vdd-arm {
+        compatible = "pwm-regulator";
+        pwms = <&pwm0_4ch_0 0 5000 1>;
+        regulator-name = "vdd_arm";
+        regulator-min-microvolt = <710000>;
+        regulator-max-microvolt = <1207000>;
+        regulator-init-microvolt = <1011000>;
+        regulator-always-on;
+        regulator-boot-on;
+        regulator-settling-time-up-us = <250>;
+        pwm-supply = <&vcc_sys>;
+    };
+};
+
+&cma {
+    size = <0x800000>;
+};
+
+&cpu0 {
+    cpu-supply = <&vdd_arm>;
+};
+
+&flexbus_fspi {
+    pinctrl-names = "default";
+    pinctrl-0 = <&flexbus0m1_pins &flexbus0_clk_pins
+                &flexbus0_d0_pins &flexbus0_d1_pins
+                &flexbus0_d2_pins &flexbus0_d3_pins>;
+    status = "disabled";
+
+    flash@0 {
+        compatible = "jedec,spi-nor";
+        reg = <0>;
+        spi-max-frequency = <100000000>;
+        spi-rx-bus-width = <4>;
+        spi-tx-bus-width = <1>;
+    };
+};
+
+&fspi {
+    status = "okay";
+    
+    flash@0 {
+        compatible = "spi-nand";
+        reg = <0>;
+        spi-max-frequency = <80000000>;
+        spi-rx-bus-width = <4>;
+        spi-tx-bus-width = <1>;
+    };
+};
+
+&pinctrl {
+    gpio-keys {
+        key_wake_up: key-wake-up {
+            rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+    };
+};
+
+&pwm0_4ch_0 {
+    pinctrl-names = "active";
+    pinctrl-0 = <&rm_io21_pwm0_ch0>;
+    status = "okay";
+};
+
+&pwm0_4ch_1 {
+    pinctrl-names = "active";
+    pinctrl-0 = <&rm_io20_pwm0_ch1>;
+    status = "disabled";
+};
+
+&pwm0_4ch_2 {
+    pinctrl-names = "active";
+    pinctrl-0 = <&rm_io3_pwm0_ch2>;
+    status = "disabled";
+};
+
+&rga2 {
+    status = "okay";
+};
+
+&rng {
+    status = "okay";
+};
+
+&rockchip_suspend {
+    rockchip,sleep-mode-config = <
+        (0
+        | RKPM_ARMOFF_DDRPD
+        | RKPM_24M_OSC_DIS
+        | RKPM_32K_CLK
+        | RKPM_32K_SRC_RC
+        | RKPM_PWM0_CH0_REGULATOR
+        )
+    >;
+
+    rockchip,apios-suspend = <
+        (0
+        | RKPM_PWREN_CORE_GPIO0A2 | RKPM_PWREN_CORE_ACT_LOW
+        | RKPM_PWREN_SLEEP_GPIO0A0 | RKPM_PWREN_SLEEP_ACT_LOW
+        )
+    >;
+};
+
+&tsadc {
+    status = "okay";
+};
+
+&uart5 {
+    pinctrl-0 = <&uart5m0_xfer_pins &uart5m0_ctsn_pins>;
+    status = "disabled";
+};
+

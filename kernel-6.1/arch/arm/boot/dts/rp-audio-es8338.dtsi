@@ -1,0 +1,71 @@
+/{
+    es8388_sound: es8388-sound {
+        status = "okay";
+        compatible = "rockchip,multicodecs-card";
+        rockchip,card-name = "rockchip-es8388";
+        hp-det-gpio = <&gpio4 RK_PB2 GPIO_ACTIVE_LOW>;
+        // hp-con-gpio = <&gpio3 RK_PD6 GPIO_ACTIVE_HIGH>;
+        rockchip,format = "i2s";
+        rockchip,mclk-fs = <256>;
+        rockchip,cpu = <&sai1>;
+        rockchip,codec = <&es8388>;
+        rockchip,audio-routing =
+            "Headphone", "LOUT1",
+            "Headphone", "ROUT1",
+            "Speaker", "LOUT2",
+            "Speaker", "ROUT2",
+            "Headphone", "Headphone Power",
+            "Headphone", "Headphone Power",
+            "Speaker", "Speaker Power",
+            "Speaker", "Speaker Power",
+            "LINPUT1", "Main Mic",
+            "LINPUT2", "Main Mic",
+            "RINPUT1", "Headset Mic",
+            "RINPUT2", "Headset Mic";
+        pinctrl-names = "default";
+        pinctrl-0 = <&hp_det>;
+        play-pause-key {
+            label = "playpause";
+            linux,code = <KEY_PLAYPAUSE>;
+            press-threshold-microvolt = <2000>;
+        };
+    };    
+};
+
+&sai1 {
+	status = "okay";
+        pinctrl-names = "default";
+        pinctrl-0 = <&rm_io9_sai1_sclk
+                     &rm_io10_sai1_lrck
+                     &rm_io11_sai1_sdi
+                     &rm_io12_sai1_sdo0>;
+};
+
+&i2c2 {
+    status = "okay";
+    es8388: es8388@10 {
+        status = "okay";
+        #sound-dai-cells = <0>;
+        compatible = "everest,es8388", "everest,es8323";
+        reg = <0x10>;
+        clocks = <&mclkout_sai1>;
+        clock-names = "mclk";
+        assigned-clocks = <&mclkout_sai1>;
+        assigned-clock-rates = <12288000>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&rm_io8_sai1_mclk>;
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    /delete-node/ es8388@11;
+};
+
+&pinctrl {
+    headphone {
+        hp_det: hp-det {
+            rockchip,pins = <4 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
+        };
+    };    
+};

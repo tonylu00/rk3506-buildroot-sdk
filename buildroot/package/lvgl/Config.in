@@ -1,0 +1,9 @@
+# LVGL - Light and Versatile Graphics Library
+menuconfig BR2_PACKAGE_LVGL
+	bool "LVGL"
+
+if BR2_PACKAGE_LVGL
+source "package/lvgl/lvgl/Config.in"
+source "package/lvgl/lv_drivers/Config.in"
+source "package/lvgl/lvgl_demo/Config.in"
+endif

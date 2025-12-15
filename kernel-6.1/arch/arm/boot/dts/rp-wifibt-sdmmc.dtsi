@@ -1,0 +1,62 @@
+/ {
+    wireless_wlan: wireless-wlan {
+        status = "disabled";
+        compatible = "wlan-platdata";
+        wifi_chip_type = "rtl8189fs";
+        pinctrl-names = "default";
+        pinctrl-0 = <&wifi_host_wake_irq>;
+        //WIFI,host_wake_irq = <&gpio1 RK_PC3 GPIO_ACTIVE_HIGH>;
+        WIFI,poweren_gpio = <&gpio1 RK_PC2 GPIO_ACTIVE_HIGH>;   
+    };
+
+    sdio_pwrseq: sdio-pwrseq {
+        status = "okay";
+        compatible = "mmc-pwrseq-simple";
+        pinctrl-names = "default";
+        pinctrl-0 = <&wifi_poweren_gpio>;
+        /*
+         * On the module itself this is one of these (depending
+         * on the actual card populated):
+         * - SDIO_RESET_L_WL_REG_ON
+         * - PDN (power down when low)
+         */
+        post-power-on-delay-ms = <300>;
+        reset-gpios = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;   
+    };
+
+	wireless-bluetooth {
+                status = "disabled";
+        };
+
+};
+
+&mmc {
+    status = "okay";
+    max-frequency = <150000000>;
+    bus-width = <4>;
+    cap-sd-highspeed;
+    no-sd;
+    pinctrl-names = "default";
+    pinctrl-0 = <&sdmmc_clk_pins &sdmmc_cmd_pins &sdmmc_bus4_pins>;
+    ignore-pm-notify;
+    keep-power-in-suspend;
+    non-removable;
+    cap-sdio-irq;
+    disable-wp;
+    mmc-pwrseq = <&sdio_pwrseq>;
+    sd-uhs-sdr104;	
+};
+
+&pinctrl {
+    wireless-wlan {
+        wifi_host_wake_irq: wifi-host-wake-irq {
+            rockchip,pins = <1 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
+        };    
+        wifi_poweren_gpio: wifi-poweren-gpio {
+            rockchip,pins = <1 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
+        };
+    };
+};
+
+
+

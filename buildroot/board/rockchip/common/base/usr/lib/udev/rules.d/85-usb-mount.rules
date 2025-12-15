@@ -1,0 +1,9 @@
+
+KERNEL=="sd[a-z][0-9]", SUBSYSTEMS=="usb", ACTION=="add", RUN+="/usr/bin/usb-mount.sh add %k"
+KERNEL=="sd[a-z][0-9]", SUBSYSTEMS=="usb", ACTION=="remove", RUN+="/usr/bin/usb-mount.sh remove %k"
+KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ACTION=="add", RUN+="/usr/bin/usb-mount.sh add %k"
+KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ACTION=="remove", RUN+="/usr/bin/usb-mount.sh remove %k"
+
+
+KERNEL=="mmcblk[1-9]p[0-9]", SUBSYSTEMS=="mmc",ACTION=="add",  RUN+="/usr/bin/usb-mount.sh add %k"
+KERNEL=="mmcblk[1-9]p[0-9]", SUBSYSTEMS=="mmc",ACTION=="remove",  RUN+="/usr/bin/usb-mount.sh remove %k"

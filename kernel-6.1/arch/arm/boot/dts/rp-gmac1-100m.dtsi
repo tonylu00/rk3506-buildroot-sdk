@@ -1,0 +1,26 @@
+&gmac1 {
+    status = "okay";
+    phy-mode = "rmii";
+    clock_in_out = "output";
+    snps,reset-gpio = <&nca9555_gpio IO_01 GPIO_ACTIVE_LOW>; 
+    snps,reset-active-low;
+    /* Reset time is 20ms, 100ms for rtl8211f */
+    snps,reset-delays-us = <0 20000 100000>;
+    pinctrl-names = "default";      
+    tx_delay = <0x19>;
+    rx_delay = <0x22>;
+    phy-handle = <&rgmii_phy1>;
+    pinctrl-0 = < &eth_rmii1_tx_bus2_pins
+                &eth_rmii1_rx_bus2_pins
+                &eth_rmii1_clk_pins
+                &eth_rmii1_miim_pins>;
+};
+
+&mdio1 {
+    rgmii_phy1: phy@1 {
+        compatible = "ethernet-phy-ieee802.3-c22";
+        reg = <0x1>;
+        //clocks = <&cru REFCLKO25M_GMAC1_OUT>;
+    };
+};
+
