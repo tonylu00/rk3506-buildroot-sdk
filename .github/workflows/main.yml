@@ -1,0 +1,61 @@
+name: RK3506 Buildroot Kernel Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install git bc bison build-essential curl flex g++-multilib \
+          gcc-multilib gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool \
+          libncurses-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush \
+          rsync schedtool squashfs-tools xsltproc yasm zip zlib1g-dev python-is-python3 \
+          device-tree-compiler expect g++ patchelf gawk texinfo chrpath diffstat \
+          binfmt-support qemu-user-static live-build fakeroot cmake ssh make gcc \
+          g++ unzip ncurses-dev python3-pip libncurses6 libc6:i386 genext2fs u-boot-tools \
+          mtools parted libudev-dev libusb-1.0-0-dev autoconf autotools-dev libsigsegv2 \
+          m4 intltool libdrm-dev sed binutils wget libglib2.0-dev libgtk2.0-dev \
+          libglade2-dev cvs mercurial openssh-client subversion asciidoc w3m dblatex \
+          graphviz  device-tree-compiler flex bison openssl libssl-dev \
+          unzip git-lfs ccache libelf-dev default-jdk mtd-utils scons -y
+          sudo apt install openjdk-8-jdk -y
+          sudo apt install libmpc-dev tcl-expect-dev -y
+
+      - name: Install python2.7
+        run: |
+          sudo apt update
+          wget http://security.ubuntu.com/ubuntu/pool/universe/p/python2.7/python2.7_2.7.18-13ubuntu1.5_amd64.deb \
+          http://security.ubuntu.com/ubuntu/pool/universe/p/python2.7/libpython2.7-stdlib_2.7.18-13ubuntu1.5_amd64.deb \
+          http://security.ubuntu.com/ubuntu/pool/universe/p/python2.7/python2.7-minimal_2.7.18-13ubuntu1.5_amd64.deb \
+          http://security.ubuntu.com/ubuntu/pool/universe/p/python2.7/libpython2.7-minimal_2.7.18-13ubuntu1.5_amd64.deb  
+          sudo apt install ./libpython2.7-minimal_2.7.18-13ubuntu1.5_amd64.deb \
+          ./libpython2.7-stdlib_2.7.18-13ubuntu1.5_amd64.deb \
+          ./python2.7-minimal_2.7.18-13ubuntu1.5_amd64.deb \
+          ./python2.7_2.7.18-13ubuntu1.5_amd64.deb
+          sudo ln -s /usr/bin/python2.7 /usr/bin/python2
+
+      - name: Build
+        run: |
+          export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          ./build.sh defconfig:U7-rk3506g_buildroot_defconfig
+          ./build.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rk3506-firmware
+          path: |
+            output/firmware/*
