@@ -54,7 +54,7 @@ jobs:
           ./build.sh
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: rk3506-firmware
           path: |
