@@ -47,6 +47,10 @@ jobs:
           ./python2.7_2.7.18-13ubuntu1.5_amd64.deb
           sudo ln -s /usr/bin/python2.7 /usr/bin/python2
 
+      - name: Cleanup apt cache
+        run: |
+          sudo apt clean
+
       - name: Build
         run: |
           export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
